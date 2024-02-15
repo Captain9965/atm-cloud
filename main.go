@@ -4,16 +4,21 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"mqtt-publisher-subscriber-golang/consts"
+
+	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var db = make(map[string]string)
 
 func setupRouter() *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
+	// instance with logger and recovery middleware
 	r := gin.Default()
 
-	// Ping test
+	// Ping pong
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
@@ -37,8 +42,9 @@ func setupRouter() *gin.Engine {
 	//	  "manu": "123",
 	//}))
 	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
-		"foo":  "bar", // user:foo password:bar
-		"manu": "123", // user:manu password:123
+		//user password pairs
+		"lenny":  "nullpass",
+		"Robert": "123",
 	}))
 
 	/* example curl for /admin with basicauth header
@@ -60,7 +66,7 @@ func setupRouter() *gin.Engine {
 
 		if c.Bind(&json) == nil {
 			db[user] = json.Value
-			c.JSON(http.StatusOK, gin.H{"status": "ok"})
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "user": user})
 		}
 	})
 
