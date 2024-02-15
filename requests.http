@@ -1,0 +1,28 @@
+@host=0.0.0:8080
+
+//ping pong test:
+###
+GET  http://{{host}}/ping
+Host:{{host}}
+###
+
+//test url params:
+###
+GET  http://{{host}}/user/lenny
+Host:{{host}}
+###
+
+// test httpBasicAuth with a value binding:
+###
+POST http://{{host}}/admin
+Host:{{host}}
+Authorization: Basic bGVubnk6bnVsbHBhc3M=
+Content-Type: application/json
+
+{
+
+    "value": "You are now authorized"
+}
+
+
+###
