@@ -5,11 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"mqtt-publisher-subscriber-golang/consts"
+	// "mqtt-publisher-subscriber-golang/consts"
 
-	"time"
+	// "time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	// mqtt "github.com/eclipse/paho.mqtt.golang"
+
+	"cloud/mqttApp"
 )
 
 var db = make(map[string]string)
@@ -74,7 +76,10 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
+	
+	mqttApi.DisplayMqtt()
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
+	
 }
