@@ -5,13 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	// "mqtt-publisher-subscriber-golang/consts"
-
-	// "time"
-
-	// mqtt "github.com/eclipse/paho.mqtt.golang"
+	"time"
 
 	"cloud/mqttApp"
+
 )
 
 var db = make(map[string]string)
@@ -25,7 +22,6 @@ func setupRouter() *gin.Engine {
 		c.String(http.StatusOK, "pong")
 	})
 
-	// Get user value
 	r.GET("/user/:name", func(c *gin.Context) {
 		user := c.Params.ByName("name")
 		value, ok := db[user]
@@ -36,28 +32,12 @@ func setupRouter() *gin.Engine {
 		}
 	})
 
-	// Authorized group (uses gin.BasicAuth() middleware)
-	// Same than:
-	// authorized := r.Group("/")
-	// authorized.Use(gin.BasicAuth(gin.Credentials{
-	//	  "foo":  "bar",
-	//	  "manu": "123",
-	//}))
 	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
 		//user password pairs
 		"lenny":  "nullpass",
 		"Robert": "123",
 	}))
 
-	/* example curl for /admin with basicauth header
-	   Zm9vOmJhcg== is base64("foo:bar")
-
-		curl -X POST \
-	  	http://localhost:8080/admin \
-	  	-H 'authorization: Basic Zm9vOmJhcg==' \
-	  	-H 'content-type: application/json' \
-	  	-d '{"value":"bar"}'
-	*/
 	authorized.POST("admin", func(c *gin.Context) {
 		user := c.MustGet(gin.AuthUserKey).(string)
 
@@ -75,11 +55,23 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
+func publish() {
+	client := mqttApi.Connect("lenny", "broker.hivemq.com:1883", "lenny", "Lenny123")
+	timer := time.NewTicker(1 * time.Second)
+	for t := range timer.C {
+		client.Publish("me", 0, false, t.String())
+	}
+}
+
+func runMqtt(){
+	mqttApi.Listen("broker.hivemq.com:1883", "me", "client", "lenny", "Lenny123")
+	publish()
+}
+
 func main() {
-	
-	mqttApi.DisplayMqtt()
+	//mqtt go routine
+	go runMqtt()
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
-	
 }
