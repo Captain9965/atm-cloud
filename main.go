@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"time"
+	// "time"
 
 	"cloud/mqttApp"
 
@@ -55,22 +55,18 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-func publish() {
-	client := mqttApi.Connect("lenny", "broker.hivemq.com:1883", "lenny", "Lenny123")
-	timer := time.NewTicker(1 * time.Second)
-	for t := range timer.C {
-		client.Publish("me", 0, false, t.String())
-	}
-}
+// func publish() {
+// 	client := mqttApi.Connect("lenny", "broker.hivemq.com:1883", "lenny", "Lenny123")
+// 	timer := time.NewTicker(1 * time.Second)
+// 	for t := range timer.C {
+// 		client.Publish("me", 0, false, t.String())
+// 	}
+// }
 
-func runMqtt(){
-	mqttApi.Listen("broker.hivemq.com:1883", "me", "client", "lenny", "Lenny123")
-	publish()
-}
 
 func main() {
 	//mqtt go routine
-	go runMqtt()
+	go mqttApi.RunMqtt()
 	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
