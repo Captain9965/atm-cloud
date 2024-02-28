@@ -1,8 +1,13 @@
-@host=0.0.0:8080
+@host=af08b59809e68d016fa5cd189bea3d24.serveo.net
 
 //ping pong test:
 ###
-GET  http://{{host}}/ping
+GET  https://{{host}}/ping
+Host:{{host}}
+###
+//register urls
+###
+GET  https://{{host}}/register_urls
 Host:{{host}}
 ###
 
@@ -22,6 +27,16 @@ Content-Type: application/json
 {
 
     "value": "You are now authorized"
+}
+
+// test post request with an amount binding..eg c to b daraja:
+###
+POST https://{{host}}/confirmation
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "TransAmount": 1
 }
 
 

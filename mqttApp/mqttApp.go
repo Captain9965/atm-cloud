@@ -25,7 +25,7 @@ type hello_t struct {
 }
 
 func RunMqtt() {
-	NewClient := Connect("master", "broker.hivemq.com:1883", "lenny", "Lenny123")
+	NewClient := Connect("master", "broker.emqx.io:1883", "lenny", "Lenny123")
 	mqttClient = &NewClient
 	Listen(mqttClient, "w/s/#")
 }
@@ -106,4 +106,9 @@ func getUidFromTopic(topic string) (string, bool) {
 	} else {
 		return "", false
 	}
+}
+
+func Publish(topic string, payload interface{}){
+	fmt.Printf("Sending --> %s", payload)
+	(*mqttClient).Publish(topic, 0, false, payload)
 }
