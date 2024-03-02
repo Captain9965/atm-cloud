@@ -2,27 +2,20 @@ package main
 
 import (
 	"bytes"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
-	// "time"
+	"github.com/google/uuid"
 	"cloud/mqttApp"
+	stkapp "cloud/stkApp"
+	"cloud/ussdApp"
 	"strconv"
 )
 
 var db = make(map[string]string)
 
-type AuthToken struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   string `json:"expires_in"`
-}
-
-var authToken *AuthToken
 
 func setupRouter() *gin.Engine {
 	// instance with logger and recovery middleware
@@ -45,7 +38,6 @@ func setupRouter() *gin.Engine {
 	r.GET("/register_urls", func(c *gin.Context) {
 		registerURL()
 	})
-
 
 	authorized := r.Group("/", gin.BasicAuth(gin.Accounts{
 		//user password pairs
@@ -87,6 +79,13 @@ func setupRouter() *gin.Engine {
 		}
 	})
 
+	r.POST("ussd_callback", func(c *gin.Context) {
+		ussdApp.UssdCallback(c)
+	})
+	r.POST("stk_callback", func(c *gin.Context) {
+		stkapp.SafStkCallback(c)
+	})
+
 	return r
 }
 
@@ -97,44 +96,6 @@ func setupRouter() *gin.Engine {
 //			client.Publish("me", 0, false, t.String())
 //		}
 //	}
-func getToken() {
-
-	consumerKey := "ITHYll8TtraEAEgQzmh9xlHPSBB3fjIsGMEiAreNBAzvnnkg"
-	consumerSecret := "Pc7nWwXoCO8qBzQAjhBGPzpm0vGW8FXO0u0GusIArTiCv5QhrfLbC4rJeTxb3IhU"
-	password := consumerKey + ":" + consumerSecret
-	b64Password := base64.StdEncoding.EncodeToString([]byte(password))
-
-	url := "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-	method := "GET"
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Basic "+b64Password)
-
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	body, err := io.ReadAll(res.Body)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	// fmt.Println(string(body))
-	authToken = &AuthToken{}
-	err = json.Unmarshal(body, authToken)
-	if err != nil {
-		fmt.Println("Error ->", err)
-		return
-	}
-	fmt.Println(authToken.AccessToken)
-
-}
 
 func registerURL() {
 	url := "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl"
@@ -153,7 +114,7 @@ func registerURL() {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+authToken.AccessToken)
+	req.Header.Add("Authorization", "Bearer "+stkapp.Token.AccessToken)
 
 	res, err := client.Do(req)
 
@@ -172,8 +133,6 @@ func registerURL() {
 }
 
 func main() {
-	//loadtoken
-	getToken()
 	//mqtt go routine
 	go mqttApi.RunMqtt()
 	r := setupRouter()
