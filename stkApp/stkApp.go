@@ -179,17 +179,17 @@ func SendStkPush(number string, amount int) {
 }
 
 func checkTransactionInLoop(stkResponse *StkResponseData_t){
+	// Wait for 2 seconds..
+	time.Sleep(4 * time.Second)
 	// Initialize a counter
-
 	count := 0
 	// Create a ticker that ticks once every second
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop() // Stop the ticker when the loop ends
-
 	// Loop until either count reaches 10 or function returns true
 	for range ticker.C {
 		count++
-		if CheckTransactionStatus(stkResponse) || count >= 10 {
+		if CheckTransactionStatus(stkResponse) || count >= 20 {
 			fmt.Println("Exiting loop.")
 			break
 		}
