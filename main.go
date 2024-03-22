@@ -2,16 +2,17 @@ package main
 
 import (
 	"bytes"
+	dbapp "cloud/dbApp"
+	"cloud/mqttApp"
+	stkapp "cloud/stkApp"
+	"cloud/ussdApp"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"cloud/mqttApp"
-	stkapp "cloud/stkApp"
-	"cloud/ussdApp"
-	"strconv"
 )
 
 var db = make(map[string]string)
@@ -133,6 +134,8 @@ func registerURL() {
 }
 
 func main() {
+	//First connect to database:
+	dbapp.ConnectDatabase()
 	//mqtt go routine
 	go mqttApi.RunMqtt()
 	r := setupRouter()
