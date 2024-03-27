@@ -1,13 +1,13 @@
-@host=0fd4-41-84-130-206.ngrok-free.app
+@host=localhost:8080
 
 //ping pong test:
 ###
-GET  https://{{host}}/ping
+GET  http://{{host}}/ping
 Host:{{host}}
 ###
 //register urls
 ###
-GET  https://{{host}}/register_urls
+GET  http://{{host}}/register_urls
 Host:{{host}}
 ###
 
@@ -31,13 +31,31 @@ Content-Type: application/json
 
 // test post request with an amount binding..eg c to b daraja:
 ###
-POST https://{{host}}/confirmation
+POST http://{{host}}/confirmation
 Host:{{host}}
 Content-Type: application/json
 
 {
     "TransAmount": 1
 }
+###
 
+// test post request with an amount binding..eg c to b daraja:
+###
+POST http://{{host}}/createuser
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "username": "Lenny",
+    "password": "oneGod",
+    "role": 0
+}
+###
+
+// test post request with an amount binding..eg c to b daraja:
+###
+GET http://{{host}}/users
+Host:{{host}}
 
 ###
