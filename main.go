@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -18,9 +19,8 @@ import (
 var db = make(map[string]string)
 
 
-func setupRouter() *gin.Engine {
+func setupRouter(r *gin.Engine){
 	// instance with logger and recovery middleware
-	r := gin.Default()
 
 	// Ping pong
 	r.GET("/ping", func(c *gin.Context) {
@@ -60,6 +60,51 @@ func setupRouter() *gin.Engine {
 		}
 	})
 
+	// create a user
+	r.POST("/createuser", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+	
+		// Bind JSON from request body
+		var newUser struct {
+		  Username string  `json:"username" binding:"required"`
+		  Password string  `json:"password" binding:"required"`
+		  Role int			`json:"role" binding:"required"`
+		}
+
+		if err := c.Bind(&newUser); err != nil {
+		  c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		}
+	
+		// Create the superuser in the database
+		err := Db.CreateUser(map[string]interface{}{
+		  "username": newUser.Username,
+		  "password": newUser.Password,
+		  "role"	: newUser.Role,
+		})
+
+		if err != nil {
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user", "Description":err.Error()})
+		  return
+		}
+	
+		c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+	  })
+
+	  // get all users
+	  r.GET("/users", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+	
+		// Get all users
+		users, err := Db.GetAllUsers()
+
+		if err != nil {
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users", "Description":err.Error()})
+		  return
+		}
+	
+		c.JSON(http.StatusOK, users)
+	  })
+
 	r.POST("confirmation", func(c *gin.Context) {
 		// Parse JSON
 		var confirmation struct {
@@ -87,16 +132,8 @@ func setupRouter() *gin.Engine {
 		stkapp.SafStkCallback(c)
 	})
 
-	return r
 }
 
-//	func publish() {
-//		client := mqttApi.Connect("lenny", "broker.hivemq.com:1883", "lenny", "Lenny123")
-//		timer := time.NewTicker(1 * time.Second)
-//		for t := range timer.C {
-//			client.Publish("me", 0, false, t.String())
-//		}
-//	}
 
 func registerURL() {
 	url := "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl"
@@ -133,12 +170,31 @@ func registerURL() {
 	fmt.Println(string(body))
 }
 
+// middleware function to set the db connection object within the context for all routes
+func dbMiddleware(db dbapp.Database) gin.HandlerFunc {
+	return func(c *gin.Context) {
+	  c.Set("db", db)
+	  c.Next()
+	}
+}
+
 func main() {
-	//First connect to database:
-	dbapp.ConnectDatabase()
+	//Connect to database as the first thing: 
+	Db := &dbapp.GormDB{}
+
+	err := Db.Connect()
+	if err != nil{
+		fmt.Println("Unable to initialize database")
+		panic(err)
+	}
+	
+	r := gin.Default()
+	r.Use(dbMiddleware(Db))
+	setupRouter(r)
+
 	//mqtt go routine
 	go mqttApi.RunMqtt()
-	r := setupRouter()
 	// Listen and Server in 0.0.0.0:8080
 	r.Run(":8080")
+
 }
