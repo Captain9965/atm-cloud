@@ -49,7 +49,9 @@ Content-Type: application/json
 {
     "username": "Lenny",
     "password": "oneGod",
-    "role": 0
+    "phonenumber":"0792066199",
+    "role": 1,
+    "org": "Milenium"
 }
 ###
 
@@ -58,4 +60,31 @@ Content-Type: application/json
 GET http://{{host}}/users
 Host:{{host}}
 
+###
+
+//create organization: 
+###
+POST http://{{host}}/createorg
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "orgname":"Milenium"
+}
+###
+
+###
+GET http://{{host}}/orgs
+Host:{{host}}
+
+###
+
+###
+DELETE  http://{{host}}/deleteuser
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "username": "Lenny"
+}
 ###
