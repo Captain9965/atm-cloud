@@ -32,8 +32,10 @@ func setupRouter(r *gin.Engine){
 		value, ok := db[user]
 		if ok {
 			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
+			return
 		} else {
 			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
+			return
 		}
 	})
 	r.GET("/register_urls", func(c *gin.Context) {
@@ -57,6 +59,7 @@ func setupRouter(r *gin.Engine){
 		if c.Bind(&json) == nil {
 			db[user] = json.Value
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "user": user})
+			return
 		}
 	})
 
@@ -90,6 +93,7 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user", "Description":err.Error()})
+		  return
 		}
 	
 		c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
@@ -104,6 +108,7 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users", "Description":err.Error()})
+		  return
 		
 		}
 			c.JSON(http.StatusOK, users)
@@ -121,7 +126,7 @@ func setupRouter(r *gin.Engine){
 			err := Db.DeleteUserByName(user.Username)
 			if err != nil{
 				c.JSON(http.StatusNotFound, gin.H{"error": "Failed to delete user", "Description":err.Error()})
-		  return
+		  	return
 			}
 			c.JSON(http.StatusOK, gin.H{"User deleted": user.Username})
 		})
@@ -164,7 +169,7 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve organiizations", "Description":err.Error()})
-		  
+		  return
 		}
 	
 		c.JSON(http.StatusOK, orgs)

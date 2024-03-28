@@ -47,11 +47,11 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "username": "Lenny",
-    "password": "oneGod",
-    "phonenumber":"0792066199",
+    "username": "Kevin",
+    "password": "vokeMid",
+    "phonenumber":"0792334565",
     "role": 1,
-    "org": "Milenium"
+    "org": "Master"
 }
 ###
 
