@@ -88,3 +88,16 @@ Content-Type: application/json
     "username": "Lenny"
 }
 ###
+
+###
+POST   http://{{host}}/updateuser
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "username": "Kevin",
+    "new_role" : "ADMIN",
+    "new_phonenumber": "076363636",
+    "new_password": "ilyazz"
+}
+###

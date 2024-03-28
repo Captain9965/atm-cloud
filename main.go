@@ -99,6 +99,51 @@ func setupRouter(r *gin.Engine){
 		c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
 	  })
 
+	  r.POST("/updateuser", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+	
+		// Bind JSON from request body
+		var updatedUser struct {
+		  Username string  			`json:"username" binding:"required"`
+		  NewUsername string  		`json:"new_username"`
+		  NewPassword string  		`json:"new_password"`
+		  NewRole string			`json:"new_role"`
+		  NewOrg string	   			`json:"new_org"`
+		  NewPhoneNumber string 	`json:"new_phonenumber"`
+		}
+
+		if err := c.Bind(&updatedUser); err != nil {
+		  c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		  return
+		}
+		
+		// Create the superuser in the database
+		updatedData := map[string]interface{}{"username": updatedUser.Username}
+		if updatedUser.NewUsername != ""{
+			updatedData["new_username"] = updatedUser.NewUsername
+		}
+
+		if updatedUser.NewPassword != ""{
+			updatedData["new_password"] = updatedUser.NewPassword
+		}
+
+		if updatedUser.NewRole != ""{
+			updatedData["new_role"] = updatedUser.NewRole
+		}
+
+		if updatedUser.NewPhoneNumber != ""{
+			updatedData["new_phonenumber"] = updatedUser.NewPhoneNumber
+		}
+
+		err := Db.UpdateUserByName(updatedUser.Username, updatedData)
+		if err != nil {
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user", "Description":err.Error()})
+		  return
+		}
+	
+		c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+	  })
+
 	  // get all users
 	  r.GET("/users", func(c *gin.Context) {
 		Db := c.MustGet("db").(dbapp.Database)

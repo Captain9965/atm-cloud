@@ -22,7 +22,7 @@ type User struct {
 	Username       string       `json:"username"`
 	UserPhone      string       `json:"user_phone_number"`         // Optional field
 	MachinesOwned  []Machine    `gorm:"foreignKey:OwnerID"`  //one 2 many
-	Role           int          `json:"role"`                      // Permission level (1 - Superuser, 2 - Admin, 3 - Owner, 4 - Operator)
+	Role           string          `json:"role"`                      // Permission level 
 	OrganizationID uint         `json:"organization_id"`           // Foreign key to Organizations
 	Organization   Organization  // Belongs to Organization
 	Password string       		`json:"-"`                         // Excluded from JSON marshaling
@@ -162,17 +162,17 @@ func (db *GormDB) UpdateUserByName(username string, fieldsToUpdate map[string]in
 	// Update user fields based on the provided map
 	for field, newValue := range fieldsToUpdate {
 	  switch field {
-	  case "username": 
+	  case "new_username": 
 		existingUser.Username = newValue.(string)
-	  case "password":
+	  case "new_password":
 		hashedPassword, err := HashPassword(newValue.(string))
 		if err != nil {
 		  return err
 		}
 		existingUser.Password = hashedPassword
-	  case "role":
-		existingUser.Role = newValue.(int) // Ensure newValue is cast to int
-	  case "phone_number": // Assuming a single phone number field in User struct
+	  case "new_role":
+		existingUser.Role = newValue.(string) // Ensure newValue is cast to string
+	  case "new_phonenumber": // Assuming a single phone number field in User struct
 		existingUser.UserPhone = newValue.(string)
 	  default:
 		// Handle updates for other supported fields (if any)
@@ -200,7 +200,7 @@ func (db *GormDB) CreateUser(userData map[string]interface{}) error {
 	  return fmt.Errorf("missing or invalid password in user data")
 	}
   
-	role, ok := userData["role"].(int)
+	role, ok := userData["role"].(string)
 	if !ok {
 	  return fmt.Errorf("missing or invalid role in user data")
 	}
