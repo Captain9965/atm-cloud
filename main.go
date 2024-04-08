@@ -32,8 +32,10 @@ func setupRouter(r *gin.Engine){
 		value, ok := db[user]
 		if ok {
 			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
+			return
 		} else {
 			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
+			return
 		}
 	})
 	r.GET("/register_urls", func(c *gin.Context) {
@@ -57,6 +59,7 @@ func setupRouter(r *gin.Engine){
 		if c.Bind(&json) == nil {
 			db[user] = json.Value
 			c.JSON(http.StatusOK, gin.H{"status": "ok", "user": user})
+			return
 		}
 	})
 
@@ -68,7 +71,7 @@ func setupRouter(r *gin.Engine){
 		var newUser struct {
 		  Username string  `json:"username" binding:"required"`
 		  Password string  `json:"password" binding:"required"`
-		  Role int		   `json:"role" binding:"required"`
+		  Role string		   `json:"role" binding:"required"`
 		  Org string	   `json:"org" binding:"required"`
 		  PhoneNumber string `json:"phonenumber" binding:"required"`
 		}
@@ -79,7 +82,7 @@ func setupRouter(r *gin.Engine){
 		  return
 		}
 	
-		// Create the superuser in the database
+
 		err := Db.CreateUser(map[string]interface{}{
 		  "username": newUser.Username,
 		  "password": newUser.Password,
@@ -90,9 +93,54 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user", "Description":err.Error()})
+		  return
 		}
 	
 		c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+	  })
+
+	  r.POST("/updateuser", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+	
+		// Bind JSON from request body
+		var updatedUser struct {
+		  Username string  			`json:"username" binding:"required"`
+		  NewUsername string  		`json:"new_username"`
+		  NewPassword string  		`json:"new_password"`
+		  NewRole string			`json:"new_role"`
+		  NewOrg string	   			`json:"new_org"`
+		  NewPhoneNumber string 	`json:"new_phonenumber"`
+		}
+
+		if err := c.Bind(&updatedUser); err != nil {
+		  c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		  return
+		}
+		
+		updatedData := map[string]interface{}{"username": updatedUser.Username}
+		if updatedUser.NewUsername != ""{
+			updatedData["new_username"] = updatedUser.NewUsername
+		}
+
+		if updatedUser.NewPassword != ""{
+			updatedData["new_password"] = updatedUser.NewPassword
+		}
+
+		if updatedUser.NewRole != ""{
+			updatedData["new_role"] = updatedUser.NewRole
+		}
+
+		if updatedUser.NewPhoneNumber != ""{
+			updatedData["new_phonenumber"] = updatedUser.NewPhoneNumber
+		}
+
+		err := Db.UpdateUserByName(updatedUser.Username, updatedData)
+		if err != nil {
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user", "Description":err.Error()})
+		  return
+		}
+	
+		c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 	  })
 
 	  // get all users
@@ -104,10 +152,33 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users", "Description":err.Error()})
+		  return
 		
 		}
 			c.JSON(http.StatusOK, users)
 		})
+
+		r.POST("/login", func(c *gin.Context) {
+			Db := c.MustGet("db").(dbapp.Database)
+		
+			var user struct{
+				Username string `json:"username" binding:"required"`
+				Password string `json:"password" binding:"required"`
+			}
+
+			if err := c.Bind(&user); err != nil{
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+			}
+
+			success, err := Db.AuthenticateUserByName(user.Username, user.Password)
+
+			if !success{
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Login failed", "Description":err.Error()})
+			} else{
+				c.JSON(http.StatusOK, gin.H{"User Login success": user.Username})
+			}
+			
+			})
 
 		r.DELETE("/deleteuser", func(c *gin.Context) {
 			Db := c.MustGet("db").(dbapp.Database)
@@ -121,14 +192,11 @@ func setupRouter(r *gin.Engine){
 			err := Db.DeleteUserByName(user.Username)
 			if err != nil{
 				c.JSON(http.StatusNotFound, gin.H{"error": "Failed to delete user", "Description":err.Error()})
-		  return
+		  	return
 			}
 			c.JSON(http.StatusOK, gin.H{"User deleted": user.Username})
 		})
 	
-		
-
-
 	// create a user
 	r.POST("/createorg", func(c *gin.Context) {
 		Db := c.MustGet("db").(dbapp.Database)
@@ -155,6 +223,33 @@ func setupRouter(r *gin.Engine){
 		c.JSON(http.StatusCreated, gin.H{"message": "Organization created successfully"})
 	  })
 
+	  r.POST("/updateorg", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+	
+		// Bind JSON from request body
+		var updatedOrg struct {
+		  Orgname string  			`json:"orgname" binding:"required"`
+		  NewOrgname string  		`json:"new_orgname"`
+		}
+
+		if err := c.Bind(&updatedOrg); err != nil {
+		  c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		  return
+		}
+		
+		updatedData := map[string]interface{}{"orgname": updatedOrg.Orgname}
+		if updatedOrg.NewOrgname != ""{
+			updatedData["new_orgname"] = updatedOrg.NewOrgname
+		}
+		err := Db.UpdateOrgByName(updatedOrg.Orgname, updatedData)
+		if err != nil {
+		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update organization", "Description":err.Error()})
+		  return
+		}
+	
+		c.JSON(http.StatusOK, gin.H{"message": "Organization updated successfully"})
+	  })
+
 	  // get all organizations
 	  r.GET("/orgs", func(c *gin.Context) {
 		Db := c.MustGet("db").(dbapp.Database)
@@ -164,11 +259,28 @@ func setupRouter(r *gin.Engine){
 
 		if err != nil {
 		  c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve organiizations", "Description":err.Error()})
-		  
+		  return
 		}
 	
 		c.JSON(http.StatusOK, orgs)
 	  })
+
+	  r.DELETE("/deleteorg", func(c *gin.Context) {
+		Db := c.MustGet("db").(dbapp.Database)
+
+		var org struct{
+			Orgname string `json:"orgname" binding:"required"`
+		}
+		if err := c.Bind(&org); err != nil{
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		}
+		err := Db.DeleteOrgByName(org.Orgname)
+		if err != nil{
+			c.JSON(http.StatusNotFound, gin.H{"error": "Failed to delete organization", "Description":err.Error()})
+		  return
+		}
+		c.JSON(http.StatusOK, gin.H{"Organization deleted": org.Orgname})
+	})
 
 	r.POST("confirmation", func(c *gin.Context) {
 		// Parse JSON
