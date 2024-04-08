@@ -72,11 +72,13 @@ type Database interface {
   	UpdateUserByName(username string, fieldsToUpdate map[string]interface{}) error //method to update by name
   	DeleteUserByName(username string) error                        // Deletes a user by name
 	GetAllUsers() ([]map[string]interface{}, error)
-
+	AuthenticateUserByName(username string, password string) (bool,error)
 	//organization
 	CreateOrganization(orgData map[string]interface{}) error  // Creates a new organization
 	GetOrganizationByName(orgname string) (map[string]interface{}, error)    // Retrieves org details by name (returns a map)
 	OrganizationExists(orgname string) bool //method to check organization's existence
+	UpdateOrgByName(orgname string, fieldsToUpdate map[string]interface{}) error // update org by name
+	DeleteOrgByName(orgname string) error
 	GetAllOrganizations()([]map[string]interface{}, error)
   
   }
@@ -124,6 +126,25 @@ func (db *GormDB) UserExists(username string) bool {
 	return result.Error == nil && result.RowsAffected > 0
 }
 
+func (db *GormDB)AuthenticateUserByName(username string, password string) (bool,error){
+	User, err := db.GetUserByName(username)
+
+	if err != nil{
+		return false, fmt.Errorf("User with the username %s does not exist", username)
+	}
+
+	currentPassword, ok := User["password"].(string)
+	if !ok || currentPassword == "" {
+	  return false, fmt.Errorf("missing or invalid password in db user object")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(currentPassword), []byte(password))
+	if err!= nil {
+		return false, fmt.Errorf("wrong password provided, err = %w", err)
+	}
+	return true, nil
+}
+
 func (db *GormDB)GetUserByName(username string) (map[string]interface{}, error){
 
 	if !db.UserExists(username) {
@@ -139,6 +160,7 @@ func (db *GormDB)GetUserByName(username string) (map[string]interface{}, error){
 	"username": user.Username,
 	"phone_number": user.UserPhone,
 	"role":     user.Role,
+	"password": user.Password,
 	}
 
 	return userData, nil
@@ -351,6 +373,50 @@ func (db *GormDB) GetAllOrganizations() ([]map[string]interface{}, error) {
 	}
   
 	return orgData, nil
+}
+
+// update user details: 
+func (db *GormDB) UpdateOrgByName(orgname string, fieldsToUpdate map[string]interface{}) error {
+
+	if !db.OrganizationExists(orgname) {
+	  return fmt.Errorf("org with name '%s' does not exist", orgname)
+	}
+  
+	// Get existing user data
+	var existingOrg Organization 
+	result := db.DB.Where("organization_name = ?", orgname).First(&existingOrg)
+	if result.Error != nil {
+	  return result.Error
+	}
+  
+	// Update org fields based on the provided map
+	for field, newValue := range fieldsToUpdate {
+	  switch field {
+	  case "new_orgname": 
+		existingOrg.OrganizationName = newValue.(string)
+	  default:
+		// Handle updates for other supported fields (if any)
+	  }
+	}
+  
+	result = db.DB.Save(&existingOrg)
+	if result.Error != nil {
+	  return result.Error
+	}
+	return nil
+  }
+
+func (db *GormDB) DeleteOrgByName(orgname string) error {
+	if !db.OrganizationExists(orgname) {
+	  return fmt.Errorf("organization with name '%s' does not exist", orgname)
+	}
+  
+	result := db.DB.Where("organization_name = ?", orgname).Delete(&Organization{}) 
+	if result.Error != nil {
+	  return result.Error
+	}
+  
+	return nil
 }
 
 // HashPassword function to hash passwords using bcrypt
