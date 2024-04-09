@@ -5,7 +5,6 @@ import (
 	// "github.com/gin-gonic/gin"
 	"github.com/google/uuid"     // Import for UUID generation
 	"gorm.io/gorm"
-	"time"
 )
 
 type GormDB struct {
@@ -15,9 +14,9 @@ type GormDB struct {
 type User struct {
 	gorm.Model
 	Username       string       `json:"username"`
-	UserPhone      string       `json:"user_phone_number"`         // Optional field
+	UserPhone      string       `json:"user_phone_number"`       
 	MachinesOwned  []Machine    `gorm:"foreignKey:OwnerID"`  //one 2 many
-	Role           string          `json:"role"`                      // Permission level 
+	Role           string       `json:"role"`                      // Permission level 
 	OrganizationID uint         `json:"organization_id"`           // Foreign key to Organizations
 	Organization   Organization  // Belongs to Organization
 	Password string       		`json:"-"`                         // Excluded from JSON marshaling
@@ -33,33 +32,41 @@ type Machine struct {
 	gorm.Model
 	MachineType           string          `json:"machine_type"`
 	MachineID             string          `json:"machine_id"`
-	OwnerID               uint            `json:"owner_id"`     // foreign key to Users 
-	User                  User            `gorm:"foreignKey:OwnerID"` // belongs to User 
+	OwnerID               uint            `json:"owner_id"`     			// foreign key to Users 
+	User                  User            `gorm:"foreignKey:OwnerID"` 		// belongs to User 
 	AdminCardID           string          `json:"admin_card_id"`
 	VendingCardID         string          `json:"vending_card_id"`
 	ServiceCardID         string          `json:"service_card_id"`
-	MachineLastUpdateTime time.Time       `json:"machine_last_update_time"`
 	TapEnableStatus       int             `json:"tap_enable_status"`
 	AdminCash             int             `json:"admin_cash"`
-	Rss                   int             `json:"rss"`                  // Signal strength
-	Locations             json.RawMessage `json:"locations"`            // Cell tower location as JSON
-	Transactions          []Transactions  `gorm:"foreignKey:MachineID"` // One-to-Many relationship with Transactions
+	Transactions          []Transactions  `gorm:"foreignKey:MachineID"` 	// One-to-Many relationship with Transactions
 }
 
 type Transactions struct {
 	gorm.Model
-	MachineID         uint      `json:"machine_id"`           // Foreign key to Machine
-	Machine           Machine   `gorm:"foreignKey:MachineID"` // Belongs to Machine
-	TransactionType   int       `json:"transaction_type"`
-	Amount            int       `json:"amount"`
-	TransactionUUID   uuid.UUID `gorm:"type:uuid"`
-	TransactionCode   string    `json:"transaction_code"`                     // Optional field
-	TransactionStatus int       `json:"transaction_status"`
+	MachineID         uint      `json:"machine_id"`           			// Foreign key to Machine
+	Machine           Machine   `gorm:"foreignKey:MachineID"` 			// Belongs to Machine
+	TransactionType   int       `json:"transaction_type"`				//type of transaction
+	Amount            int       `json:"amount"`							// transaction amount
+	TransactionUUID   uuid.UUID `gorm:"type:uuid"`						// UUID of transaction
+	TransactionCode   string    `json:"transaction_code"`            	// Optional field
+	TransactionStatus int       `json:"transaction_status"`				// 1- pending, 0 - fulfilled, -1 -failed, -2, cancelled
+}
+
+type Events struct{
+	gorm.Model
+	MachineID			uint 	`json:"machine_id"` 					//Foreign key to Machine
+	Machine				Machine `gorm:"foreignKey:MachineID"` 			//Belongs to Machine
+	Rss                 int             `json:"rss"`                  	// Signal strength
+	Location            json.RawMessage `json:"location"`            	// Cell tower location as JSON
+	EventType			string `json:"event_type"`						//EventType eg. error, heartbeat, pay
+	Data 				json.RawMessage `json:"data"`					//Data in the event
 }
 
 type Database interface {
-	// Connection management
+	// Db operations
 	Connect() error  // Connects to the database
+
 	//users
 	CreateUser(userData map[string]interface{}) error  // Creates a new user
   	GetUserByName(username string) (map[string]interface{}, error)    // Retrieves user details by name (returns a map)
@@ -68,6 +75,7 @@ type Database interface {
   	DeleteUserByName(username string) error                        // Deletes a user by name
 	GetAllUsers() ([]map[string]interface{}, error)
 	AuthenticateUserByName(username string, password string) (bool,error)
+
 	//organization
 	CreateOrganization(orgData map[string]interface{}) error  // Creates a new organization
 	GetOrganizationByName(orgname string) (map[string]interface{}, error)    // Retrieves org details by name (returns a map)
