@@ -47,11 +47,11 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "username": "Kevin",
+    "username": "Lemayan",
     "password": "vokeMid",
     "phonenumber":"0792334565",
-    "role": 1,
-    "org": "Master"
+    "role": "ADMIN",
+    "org": "Milenium"
 }
 ###
 
@@ -76,7 +76,27 @@ Content-Type: application/json
 ###
 GET http://{{host}}/orgs
 Host:{{host}}
+###
 
+###
+DELETE  http://{{host}}/deleteorg
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "orgname": "Milenium"
+}
+###
+
+###
+POST   http://{{host}}/updateorg
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "orgname": "Master",
+    "new_orgname" : "Milenium"
+}
 ###
 
 ###
@@ -85,7 +105,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "username": "Lenny"
+    "username": "Lodwar"
 }
 ###
 
@@ -95,9 +115,20 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "username": "Kevin",
+    "username": "Lemayan",
     "new_role" : "ADMIN",
     "new_phonenumber": "076363636",
-    "new_password": "ilyazz"
+    "new_password": "vokeMid"
+}
+###
+
+###
+POST   http://{{host}}/login
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "username": "Lemayan",
+    "password": "vokeMid"
 }
 ###
