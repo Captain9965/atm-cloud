@@ -1,2 +1,2 @@
-# ATM Cloud
-IoT ATM machine backend in Golang
+# IOT Cloud
+General IoT cloud backend in Golang
