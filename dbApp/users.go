@@ -167,7 +167,7 @@ func (db *GormDB) DeleteUserByName(username string) error {
 
 func (db *GormDB) GetAllUsers() ([]map[string]interface{}, error) {
 	var users []User 
-	result := db.DB.Preload("Organization").Find(&users)
+	result := db.DB.Preload("Organization").Preload("Machines").Find(&users)
 	if result.Error != nil {
 	  return nil, result.Error
 	}
@@ -175,14 +175,18 @@ func (db *GormDB) GetAllUsers() ([]map[string]interface{}, error) {
 	// Convert user structs to maps
 	userData := make([]map[string]interface{}, len(users))
 	for i, user := range users {
-	  userData[i] = map[string]interface{}{
-		"username": user.Username,
-		"phone_number": user.UserPhone,
-		"role":     user.Role,
-		"machines": user.MachinesOwned,
-		"org": user.Organization,
-		"org_id": user.OrganizationID,
-	  }
+		machineUUIDs := make([]string, len(user.Machines))
+		for j, machine := range user.Machines {
+		machineUUIDs[j] = machine.MachineUUID
+		}
+		userData[i] = map[string]interface{}{
+			"username": user.Username,
+			"phone_number": user.UserPhone,
+			"role":     user.Role,
+			"machines": machineUUIDs,
+			"org": user.Organization,
+			"org_id": user.OrganizationID,
+		}
 	}
   
 	return userData, nil
