@@ -110,11 +110,16 @@ func (db *GormDB) UpdateMachinebyID(machineUUID string, fieldsToUpdate map[strin
 }
 
 func (db *GormDB) DeleteMachineByID(machineUUID string) error {
-	result := db.Delete(&Machine{}, "machine_uuid = ?", machineUUID)
-	if result.Error != nil {
-	  return result.Error
-	}
-	return nil
+	if !db.MachineExists(machineUUID) {
+		return fmt.Errorf("machine with uuid given does not exist")
+	  }
+	
+	  result := db.DB.Where("machine_uuid = ?", machineUUID).Delete(&Machine{}) 
+	  if result.Error != nil {
+		return result.Error
+	  }
+	
+	  return nil
 }
 
 func (db *GormDB) GetAllMachines() ([]map[string]interface{}, error) {
