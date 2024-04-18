@@ -9,19 +9,19 @@ import(
 
 func RegisterMachinesApi(r *gin.Engine){
 	// create a machine
-	r.POST("/createmachine", func(c *gin.Context) {
+	r.POST("/machines/create", func(c *gin.Context) {
 		createMachine(c)
 	})
 	// udpate machine
-	r.POST("/updatemachine", func(c *gin.Context) {
+	r.POST("/machines/update", func(c *gin.Context) {
 		updateMachine(c)
 	})
 	  // get all machines
-	r.GET("/machines", func(c *gin.Context) {
+	r.GET("/machines/all", func(c *gin.Context) {
 		getAllMachines(c)
 	})
 	//delete machine
-	r.DELETE("/deletemachine", func(c *gin.Context) {
+	r.DELETE("/machines/delete", func(c *gin.Context) {
 		deleteMachine(c)
 	})
 }

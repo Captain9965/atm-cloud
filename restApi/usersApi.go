@@ -9,23 +9,23 @@ import(
 
 func RegisterUsersApi(r *gin.Engine){
 	// create a user
-	r.POST("/createuser", func(c *gin.Context) {
+	r.POST("/users/create", func(c *gin.Context) {
 		createUser(c)
 	})
 	// udpate user
-	r.POST("/updateuser", func(c *gin.Context) {
+	r.POST("/users/update", func(c *gin.Context) {
 		updateUser(c)
 	})
 	  // get all users
-	r.GET("/users", func(c *gin.Context) {
+	r.GET("/users/all", func(c *gin.Context) {
 		getAllUsers(c)
 	})
 	// login user
-	r.POST("/login", func(c *gin.Context) {
+	r.POST("/users/login", func(c *gin.Context) {
 		loginUser(c)	
 	})
 	//delete user
-	r.DELETE("/deleteuser", func(c *gin.Context) {
+	r.DELETE("/users/delete", func(c *gin.Context) {
 		deleteUser(c)
 	})
 }
