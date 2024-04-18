@@ -35,8 +35,8 @@ func (db *GormDB) CreateMachine(machineData map[string]interface{}) error {
 	}
     fmt.Print("The user found is:"); fmt.Println(user.Username)
 	machine := Machine{
-		MachineType: machineData["machine_type"].(string),
-		MachineUUID: machineData["machine_uuid"].(string),
+		MachineType: machineType,
+		MachineUUID: machineUUID,
 		User: user,
 	 }
 	 err := db.Create(&machine).Error
