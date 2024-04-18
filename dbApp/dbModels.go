@@ -2,8 +2,7 @@ package dbApp
 
 import (
 	"encoding/json"
-	// "time"
-	// "github.com/gin-gonic/gin"
+	"time"
 	"github.com/google/uuid" // Import for UUID generation
 	"gorm.io/gorm"
 )
@@ -49,7 +48,7 @@ type Transactions struct {
 	gorm.Model
 	Machine           Machine   
 	MachineID         uint      `json:"machine_id"`
-	TransactionType   int       `json:"transaction_type"`				//type of transaction
+	TransactionType   string    `json:"transaction_type"`				//type of transaction
 	Amount            int       `json:"amount"`							// transaction amount
 	TransactionUUID   uuid.UUID `gorm:"type:uuid"`						// UUID of transaction
 	TransactionCode   string    `json:"transaction_code"`            	// Optional field
@@ -95,13 +94,13 @@ type Database interface {
 	DeleteMachineByID(machineUUID string)error
 	GetAllMachines()([]map[string]interface{}, error)
 
-	// //transactions
-	// CreateTransaction(transactionData map[string]interface{})error // creates a new transactions from payment api or mqtt
-	// GetTransactionByUUID(uid uuid.UUID)(map[string]interface{}, error) // Retrieve transaction by UID
-	// TransactionExists(uid uuid.UUID)bool
-	// UpdateTransactionByUUID(uid uuid.UUID, fieldsToUpdate map[string]interface{}) error
-	// DeleteTransactionByUUID(uid uuid.UUID)error
-	// GetTransactions(from time.Time, to time.Time)([]map[string]interface{}, error)
+	//transactions
+	CreateTransaction(transactionData map[string]interface{})error // creates a new transactions from payment api or mqtt
+	GetTransactionByUUID(uid uuid.UUID)(map[string]interface{}, error) // Retrieve transaction by UID
+	TransactionExists(uid *uuid.UUID, code *string)(bool, error)
+	UpdateTransactionByUUID(uid uuid.UUID, fieldsToUpdate map[string]interface{}) error
+	DeleteTransactionByUUID(uid uuid.UUID)error
+	GetTransactions(from time.Time, to time.Time)([]map[string]interface{}, error)
 
 	// //events
 	// CreateEvent(eventData map[string]interface{})error
