@@ -34,7 +34,7 @@ func (db *GormDB) Connect() error {
 	}
 
 	// Set automigrations mode (optional)
-	err = dbClient.AutoMigrate(&User{}, &Organization{}, &Machine{}, &Transactions{})
+	err = dbClient.AutoMigrate(&User{}, &Organization{}, &Transactions{}, &Events{}, &Machine{})
 	if err != nil {
 		fmt.Println("Error occured during migration: ", err)
 	}

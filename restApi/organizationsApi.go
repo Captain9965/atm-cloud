@@ -8,19 +8,19 @@ import(
 
 func RegisterOrganizationApi(r *gin.Engine){
 	// create organization
-	r.POST("/createorg", func(c *gin.Context) {
+	r.POST("/orgs/create", func(c *gin.Context) {
 		createOrg(c)
 	})
 	// update organization
-	r.POST("/updateorg", func(c *gin.Context) {
+	r.POST("/orgs/update", func(c *gin.Context) {
 		updateOrg(c)
 	})
 	// get all organizations
-	r.GET("/orgs", func(c *gin.Context) {
+	r.GET("/orgs/all", func(c *gin.Context) {
 		getAllOrganizations(c)
 	})
 	//delete organization
-	r.DELETE("/deleteorg", func(c *gin.Context) {
+	r.DELETE("/orgs/delete", func(c *gin.Context) {
 		deleteOrganization(c)
 	})
 }
