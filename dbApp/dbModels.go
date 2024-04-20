@@ -59,8 +59,6 @@ type Events struct{
 	gorm.Model
 	MachineID			uint 	`json:"machine_id"` 					//Foreign key to Machine
 	Machine				Machine 
-	Rss                 int             `json:"rss"`         			// Signal strength
-	Location            json.RawMessage `json:"location"`            	// Cell tower location as JSON
 	EventType			string `json:"event_type"`						//EventType eg. error, heartbeat, pay
 	Data 				json.RawMessage `json:"data"`					//Data in the event
 }
@@ -102,9 +100,11 @@ type Database interface {
 	DeleteTransactionByUUID(uid uuid.UUID)error
 	GetTransactions(from time.Time, to time.Time)([]map[string]interface{}, error)
 
-	// //events
-	// CreateEvent(eventData map[string]interface{})error
-	// GetEventByID(eventID uint)(map[string]interface{}, error)
-	// EventExists(eventID uint)bool
-	// GetEvents(from time.Time, to time.Time)([]map[string]interface{}, error)
+	//events
+	CreateEvent(eventData map[string]interface{})error
+	GetEventsByType(eventType string, from time.Time, to time.Time)([]map[string]interface{}, error)
+	GetEventsByMachine(machineUUID string,from time.Time, to time.Time)([]map[string]interface{}, error)
+	DeleteEventByID(eventID uint)(bool, error)
+	UpdateEventByID(eventID uint, fieldsToUpdate map[string]interface{})error
+
   }
