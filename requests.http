@@ -42,7 +42,7 @@ Content-Type: application/json
 
 // test post request with an amount binding..eg c to b daraja:
 ###
-POST http://{{host}}/createuser
+POST http://{{host}}/users/create
 Host:{{host}}
 Content-Type: application/json
 
@@ -57,14 +57,14 @@ Content-Type: application/json
 
 // test post request with an amount binding..eg c to b daraja:
 ###
-GET http://{{host}}/users
+GET http://{{host}}/users/all
 Host:{{host}}
 
 ###
 
 //create organization: 
 ###
-POST http://{{host}}/createorg
+POST http://{{host}}/orgs/create
 Host:{{host}}
 Content-Type: application/json
 
@@ -74,22 +74,22 @@ Content-Type: application/json
 ###
 
 ###
-GET http://{{host}}/orgs
+GET http://{{host}}/orgs/all
 Host:{{host}}
 ###
 
 ###
-DELETE  http://{{host}}/deleteorg
+DELETE  http://{{host}}/orgs/delete
 Host:{{host}}
 Content-Type: application/json
 
 {
-    "orgname": "Milenium"
+    "orgname": "Milnium"
 }
 ###
 
 ###
-POST   http://{{host}}/updateorg
+POST   http://{{host}}/orgs/update
 Host:{{host}}
 Content-Type: application/json
 
@@ -100,7 +100,7 @@ Content-Type: application/json
 ###
 
 ###
-DELETE  http://{{host}}/deleteuser
+DELETE  http://{{host}}/users/delete
 Host:{{host}}
 Content-Type: application/json
 
@@ -110,12 +110,12 @@ Content-Type: application/json
 ###
 
 ###
-POST   http://{{host}}/updateuser
+POST   http://{{host}}/users/update
 Host:{{host}}
 Content-Type: application/json
 
 {
-    "username": "Lemayan",
+    "username": "Leayan",
     "new_role" : "ADMIN",
     "new_phonenumber": "076363636",
     "new_password": "vokeMid"
@@ -123,12 +123,137 @@ Content-Type: application/json
 ###
 
 ###
-POST   http://{{host}}/login
+POST   http://{{host}}/users/login
 Host:{{host}}
 Content-Type: application/json
 
 {
     "username": "Lemayan",
     "password": "vokeMid"
+}
+###
+
+###
+POST   http://{{host}}/machines/create
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "machine_type": "VENDING",
+    "owner_name": "Lemayan",
+    "machine_uuid": "audh-979798-kdh"
+}
+###
+
+###
+GET http://{{host}}/machines/all
+Host:{{host}}
+###
+
+###
+DELETE  http://{{host}}/machines/delete
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "machine_uuid": "audh-979798-kdh"
+}
+###
+
+###
+POST   http://{{host}}/machines/update
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "machine_uuid": "audh-979908-kdh",
+    "new_machine_uuid": "audh-4445-kdl"
+}
+###
+
+###
+GET http://{{host}}/transactions/get?from=2024-04-18T00:00:00Z&to=2024-04-18T14:00:00Z
+Host:{{host}}
+###
+
+###
+POST   http://{{host}}/transactions/create
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "transaction_type": "MPESA",
+    "transaction_code": "kgy6789",
+    "machine_uuid": "audh-979798-kdh",
+    "transaction_status": 1,
+    "amount": 30
+}
+###
+
+###
+DELETE  http://{{host}}/transactions/delete         
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "transaction_uuid": "e02cd1b8-e3bd-4080-9b27-ea09b4a0c205"
+}
+###
+
+###
+POST   http://{{host}}/transactions/update
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "transaction_uuid": "bb967815-b4f8-40ca-99fe-33e8206a0a5f",
+    "new_amount": 1,
+    "new_status": 0
+}
+###
+
+###
+GET http://{{host}}/events/get/type?from=2024-04-19T00:00:00Z&to=2024-04-21T14:00:00Z&type=check
+Host:{{host}}
+###
+
+###
+
+###
+GET http://{{host}}/events/get/machine?from=2024-04-19T00:00:00Z&to=2024-04-21T14:00:00Z&uuid=audh-979798-kdh
+Host:{{host}}
+###
+
+###
+POST   http://{{host}}/events/create
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "event_type": "check",
+    "machine_uuid": "audh-979798-kdh",
+    "data": {"event":"check", "sensor_val": 30}
+}
+###
+
+###
+DELETE  http://{{host}}/events/delete         
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "id": 1
+}
+###
+
+###
+POST   http://{{host}}/events/update
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "new_type": "hello",
+    "id": 2,
+    "new_data": {"event":"check", "sensor_val": 20}
 }
 ###
