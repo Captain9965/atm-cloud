@@ -11,7 +11,7 @@ func (db *GormDB) CreateTransaction(transactionData map[string]interface{})error
 
 	transactionType, ok := transactionData["transaction_type"].(string)
 	if !ok || transactionType == "" {
-	  return fmt.Errorf("missing or invalid transaction type in machine data")
+	  return fmt.Errorf("missing or invalid transaction type in transaction data")
 	}
 
 	amount, ok := transactionData["amount"].(int)
@@ -36,7 +36,7 @@ func (db *GormDB) CreateTransaction(transactionData map[string]interface{})error
 
 	machineUUID, ok := transactionData["machine_uuid"].(string)
 	if !ok || machineUUID == "" {
-		return fmt.Errorf("missing or invalid machine uuid in machine data")
+		return fmt.Errorf("missing or invalid machine uuid in transaction data")
 	}
 
 	//check if transaction already exists:
@@ -162,7 +162,6 @@ func (db *GormDB) UpdateTransactionByUUID(uid uuid.UUID, fieldsToUpdate map[stri
 }
 
 func (db *GormDB) DeleteTransactionByUUID(uid uuid.UUID)error {
-	fmt.Printf("Uid is %s", uid.String())
 	exists, err:= db.TransactionExists(&uid, nil)
 	if err != nil {
 		return err
