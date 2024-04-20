@@ -14,4 +14,5 @@ func SetupRouter(r *gin.Engine){
 	RegiserUssdApi(r)
 	RegisterMachinesApi(r)
 	RegisterTransactionsApi(r)
+	RegisterEventsApi(r)
 }

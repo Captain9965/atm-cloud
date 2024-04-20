@@ -19,7 +19,7 @@ func RegisterTransactionsApi(r *gin.Engine){
 		updateTransaction(c)
 	})
 	  // get a slice of transactions
-	r.GET("/transactions/time-range", func(c *gin.Context) {
+	r.GET("/transactions/get", func(c *gin.Context) {
 		getTransactions(c)
 	})
 	//delete transaction
