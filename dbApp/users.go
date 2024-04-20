@@ -27,7 +27,7 @@ func (db *GormDB)AuthenticateUserByName(username string, password string) (bool,
 
 	err = bcrypt.CompareHashAndPassword([]byte(currentPassword), []byte(password))
 	if err!= nil {
-		return false, fmt.Errorf("wrong password provided, err = %w", err)
+		return false, fmt.Errorf("wrong password provided")
 	}
 	return true, nil
 }
